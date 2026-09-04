@@ -24,7 +24,7 @@ const TEST_ACCOUNTS = [
     { email: 'viewer@agnidrishti.gov.in', password: 'Viewer@2026', role: 'VIEWER', color: '#72c7b5' },
 ];
 
-export default function LoginPage({ onAuthSuccess }) {
+export default function LoginPage({ onAuthSuccess, onRegistrationSuccess }) {
     const [mode, setMode] = useState('login');
     const [contentMode, setContentMode] = useState('login');
     const [form, setForm] = useState({ email: '', password: '', full_name: '', designation: '', department: '' });
@@ -68,8 +68,12 @@ export default function LoginPage({ onAuthSuccess }) {
                 email: form.email, password: form.password, full_name: form.full_name,
                 designation: form.designation, department: form.department,
             });
-            setSuccess(data.message || 'Registration submitted. Await administrator approval.');
-            setForm({ email: '', password: '', full_name: '', designation: '', department: '' });
+            if (onRegistrationSuccess) {
+                onRegistrationSuccess(data);
+            } else {
+                setSuccess(data.message || 'Registration submitted. Await administrator approval.');
+                setForm({ email: '', password: '', full_name: '', designation: '', department: '' });
+            }
         } catch (requestError) {
             setError(requestError.message);
         } finally {

@@ -25,3 +25,4 @@ data/processed/
 ml/models/*.joblib
 ml/output/*.parquet
 ml/__pycache__/
+frontend/public/assets/main.mp4

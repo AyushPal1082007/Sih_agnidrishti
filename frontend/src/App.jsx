@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { getMlStatus, getToken, getUser, clearToken, clearUser } from './api.js';
-import MapView from './MapView.jsx';
+import { getIncidents, getMlStatus, getToken, getUser, clearToken, clearUser } from './api.js';
 import AlertFeed from './AlertFeed.jsx';
 import MLPanel from './MLPanel.jsx';
 import EnteringPage from './EnteringPage.jsx';
 import Dashboard from './Dashboard.jsx';
 import LoginPage from './LoginPage.jsx';
 import ProfileBadge from './ProfileBadge.jsx';
+import LandingHome from './LandingHome.tsx';
 
 /* ─── Tab config ─────────────────────────────────────────────────────────── */
 const TABS = [
@@ -128,12 +128,12 @@ function IncidentsTab() {
 
 /* ─── Main App ────────────────────────────────────────────────────────────── */
 export default function App() {
-    const [inEntrance, setInEntrance] = useState(true);
+    const [user, setUser] = useState(() => getUser());
+    const authed = !!(user && getToken());
+    const [viewMode, setViewMode] = useState(() => authed ? 'landing' : 'entering'); // 'entering' | 'landing' | 'login' | 'dashboard'
     const [mlStatus, setMlStatus] = useState(null);
     const [hotspotCount, setHotspotCount] = useState(null);
     const [activeTab, setActiveTab] = useState('map');
-    const [user, setUser] = useState(() => getUser());
-    const authed = !!(user && getToken());
 
     useEffect(() => {
         if (!authed) return;
@@ -143,28 +143,98 @@ export default function App() {
         return () => clearInterval(t);
     }, [authed]);
 
-    const handleAuthSuccess = (u) => setUser(u);
-    const handleLogout = () => { clearToken(); clearUser(); setUser(null); };
+    const handleAuthSuccess = (u) => {
+        setUser(u);
+        setViewMode('landing');
+    };
 
-    if (inEntrance && !authed) return (
-        <>
-            <LoginPage onAuthSuccess={handleAuthSuccess} />
-            <EnteringPage onEnter={() => setInEntrance(false)} />
-        </>
-    );
-    if (!authed)    return <LoginPage onAuthSuccess={handleAuthSuccess} />;
+    const handleRegistrationSuccess = () => {
+        setViewMode('landing');
+    };
 
+    const handleLogout = () => {
+        clearToken();
+        clearUser();
+        setUser(null);
+        setViewMode('landing');
+    };
+
+    const handleLaunchDashboard = () => {
+        if (authed) {
+            setViewMode('dashboard');
+        } else {
+            setViewMode('login');
+        }
+    };
+
+    if (viewMode === 'entering') {
+        return <EnteringPage onEnter={() => setViewMode('login')} />;
+    }
+
+    // Render 3D Google Research style Landing Home
+    if (viewMode === 'landing') {
+        return (
+            <>
+                <LandingHome
+                    workspaceMode
+                    onWorkspaceNavigate={(tab) => {
+                        if (tab === 'map') return;
+                        if (!authed) {
+                            setViewMode('login');
+                            return;
+                        }
+                        setActiveTab(tab);
+                        setViewMode('dashboard');
+                    }}
+                    onLogin={() => setViewMode('login')}
+                    onSignOut={authed ? handleLogout : undefined}
+                />
+                {authed && (
+                    <aside className="globe-alert-feed" aria-label="Live alert feed">
+                        <AlertFeed />
+                    </aside>
+                )}
+            </>
+        );
+    }
+
+    // Render Login Page
+    if (viewMode === 'login') {
+        return (
+            <LoginPage
+                onAuthSuccess={handleAuthSuccess}
+                onRegistrationSuccess={handleRegistrationSuccess}
+                onBack={() => setViewMode('landing')}
+            />
+        );
+    }
+
+    // Render Full Mission Control (Live Map, Dashboard, Incidents)
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
 
             {/* ── Top Bar ── */}
             <header className="topbar">
-                <div className="topbar-brand">
+                <div className="topbar-brand" onClick={() => setViewMode('landing')} style={{ cursor: 'pointer' }} title="Return to Orbital Explorer">
                     <span className="status-dot" />
                     <h1>AgniDrishti</h1>
                 </div>
 
-                {/* ── Tab nav ── */}
+                {/* Return to 3D Earth Globe */}
+                <button
+                    onClick={() => setViewMode('landing')}
+                    style={{
+                        padding: '5px 12px', borderRadius: 8, cursor: 'pointer',
+                        fontFamily: 'inherit', fontSize: 11, fontWeight: 600,
+                        border: '1px solid rgba(56, 189, 248, 0.4)',
+                        background: 'rgba(56, 189, 248, 0.12)',
+                        color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 5,
+                        transition: 'all 0.15s ease',
+                    }}
+                    title="Switch to 3D Orbital Explorer"
+                >
+                    🌍 <span>Orbital Explorer</span>
+                </button>
                 <nav style={{ display: 'flex', gap: 4, flex: 1, justifyContent: 'center' }}>
                     {TABS.map(tab => (
                         <button
@@ -205,10 +275,13 @@ export default function App() {
             {/* ── Map Tab ── */}
             {activeTab === 'map' && (
                 <>
-                    <MapView onHotspotCount={setHotspotCount} />
-                    <aside className="sidebar">
+                    <LandingHome
+                        workspaceMode
+                        onWorkspaceNavigate={setActiveTab}
+                        onSignOut={handleLogout}
+                    />
+                    <aside className="globe-alert-feed" aria-label="Live alert feed">
                         <AlertFeed />
-                        <MLPanel onStatusChange={setMlStatus} />
                     </aside>
                 </>
             )}

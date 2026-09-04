@@ -47,6 +47,12 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+html:has(.console-page),
+body:has(.console-page),
+#root:has(.console-page) {
+    overflow: auto;
+}
+
 /* ─── Scrollbar ──────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
