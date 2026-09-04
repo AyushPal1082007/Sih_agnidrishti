@@ -1,0 +1,147 @@
+{
+  "model_name": "lightgbm",
+  "version": "1.0.0",
+  "training_data_mode": "synthetic_benchmark",
+  "trained_at": "2026-09-04T17:13:27.808644",
+  "feature_count": 33,
+  "feature_names": [
+    "latitude",
+    "longitude",
+    "acquisition_hour",
+    "acquisition_month",
+    "is_night",
+    "frp",
+    "brightness",
+    "confidence_score",
+    "scan",
+    "track",
+    "landcover_code",
+    "is_cropland",
+    "is_vegetation",
+    "is_built_up",
+    "is_water",
+    "is_bare_land",
+    "nearest_road_distance_m",
+    "nearby_road_count",
+    "is_road_adjacent",
+    "building_count",
+    "nearest_building_distance_m",
+    "has_nearby_buildings",
+    "settlement_count",
+    "nearest_settlement_distance_m",
+    "is_near_settlement",
+    "industrial_count",
+    "nearest_industrial_distance_m",
+    "is_near_industrial",
+    "water_body_count",
+    "nearest_water_distance_m",
+    "has_nearby_water",
+    "poi_count",
+    "landuse_count"
+  ],
+  "threat_classes": {
+    "0": "Controlled / Low Risk Thermal Activity",
+    "1": "Agricultural / Stubble Burning (Cropland)",
+    "2": "Wildfire / Vegetation Fuel Fire",
+    "3": "Critical Industrial Hazard Fire (Refineries / Chemical Zones)"
+  },
+  "cv_results": {
+    "lightgbm": {
+      "accuracy_mean": 0.9613,
+      "accuracy_std": 0.015,
+      "f1_macro_mean": 0.9614,
+      "f1_macro_std": 0.015,
+      "f1_weighted_mean": 0.9611,
+      "f1_weighted_std": 0.015
+    },
+    "random_forest": {
+      "accuracy_mean": 0.9625,
+      "accuracy_std": 0.0168,
+      "f1_macro_mean": 0.9627,
+      "f1_macro_std": 0.0168,
+      "f1_weighted_mean": 0.9624,
+      "f1_weighted_std": 0.0168
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.95,
+    "precision_macro": 0.9502,
+    "recall_macro": 0.9512,
+    "f1_macro": 0.9501,
+    "precision_weighted": 0.9502,
+    "recall_weighted": 0.95,
+    "f1_weighted": 0.9495
+  },
+  "top_10_features": [
+    {
+      "rank": 1,
+      "feature": "frp",
+      "importance": 0.1276,
+      "percentage": 12.76,
+      "raw_score": 1494.0
+    },
+    {
+      "rank": 2,
+      "feature": "nearest_road_distance_m",
+      "importance": 0.1049,
+      "percentage": 10.49,
+      "raw_score": 1228.0
+    },
+    {
+      "rank": 3,
+      "feature": "confidence_score",
+      "importance": 0.0896,
+      "percentage": 8.96,
+      "raw_score": 1049.0
+    },
+    {
+      "rank": 4,
+      "feature": "brightness",
+      "importance": 0.0739,
+      "percentage": 7.39,
+      "raw_score": 865.0
+    },
+    {
+      "rank": 5,
+      "feature": "nearest_building_distance_m",
+      "importance": 0.0654,
+      "percentage": 6.54,
+      "raw_score": 766.0
+    },
+    {
+      "rank": 6,
+      "feature": "poi_count",
+      "importance": 0.0542,
+      "percentage": 5.42,
+      "raw_score": 634.0
+    },
+    {
+      "rank": 7,
+      "feature": "nearest_water_distance_m",
+      "importance": 0.0522,
+      "percentage": 5.22,
+      "raw_score": 611.0
+    },
+    {
+      "rank": 8,
+      "feature": "nearest_settlement_distance_m",
+      "importance": 0.0501,
+      "percentage": 5.01,
+      "raw_score": 586.0
+    },
+    {
+      "rank": 9,
+      "feature": "longitude",
+      "importance": 0.0468,
+      "percentage": 4.68,
+      "raw_score": 548.0
+    },
+    {
+      "rank": 10,
+      "feature": "nearest_industrial_distance_m",
+      "importance": 0.0467,
+      "percentage": 4.67,
+      "raw_score": 547.0
+    }
+  ]
+}

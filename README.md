@@ -1650,6 +1650,21 @@ Install dependencies:
 pip install -r backend/requirements.txt
 ```
 
+Generate the complete FIRMS-backed unified dataset quickly when spatial lookups
+are not required:
+
+```bash
+python -m backend.app.dataset.run_dataset --all --fast
+```
+
+The fast output is suitable for pipeline and schema testing only. It skips OSM
+and LandCover enrichment and must not be used for production ML training.
+
+When historical facility observations are unavailable, the anomaly module uses
+the explainable risk rules as a rule-based anomaly score. This is suitable for
+initial alerts, but should be replaced or calibrated with historical baselines
+when repeated observations become available.
+
 ---
 
 # 🐘 32. Database
