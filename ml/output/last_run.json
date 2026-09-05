@@ -1,1 +1,1 @@
-{"status":"done","started_at":"2026-09-02T14:36:17.645Z","finished_at":"2026-09-02T14:36:27.452Z","write_back":true,"summary":{}}
+{"status":"error","started_at":"2026-09-04T11:42:48.474Z","finished_at":"2026-09-04T11:42:48.489Z","error":"/bin/sh: /Users/aryangupta/Sih_agnidrishti/backend/venv/bin/python3: No such file or directory\n"}

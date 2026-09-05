@@ -134,6 +134,7 @@ export default function App() {
     const [mlStatus, setMlStatus] = useState(null);
     const [hotspotCount, setHotspotCount] = useState(null);
     const [activeTab, setActiveTab] = useState('map');
+    const [landingEntrance, setLandingEntrance] = useState(false);
 
     useEffect(() => {
         if (!authed) return;
@@ -145,10 +146,14 @@ export default function App() {
 
     const handleAuthSuccess = (u) => {
         setUser(u);
+        setLandingEntrance(true);
+        window.setTimeout(() => setLandingEntrance(false), 4700);
         setViewMode('landing');
     };
 
     const handleRegistrationSuccess = () => {
+        setLandingEntrance(true);
+        window.setTimeout(() => setLandingEntrance(false), 4700);
         setViewMode('landing');
     };
 
@@ -177,13 +182,14 @@ export default function App() {
             <>
                 <LandingHome
                     workspaceMode
+                    landingEntrance={landingEntrance}
                     onWorkspaceNavigate={(tab) => {
                         if (tab === 'map') return;
                         if (!authed) {
                             setViewMode('login');
                             return;
                         }
-                        setActiveTab(tab);
+                        setActiveTab(tab === 'incidents' ? 'incidents' : 'dashboard');
                         setViewMode('dashboard');
                     }}
                     onLogin={() => setViewMode('login')}

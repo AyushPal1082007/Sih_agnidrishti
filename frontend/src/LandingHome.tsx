@@ -346,7 +346,72 @@ function MiniConstellation({ regionId }) {
   );
 }
 
-export default function LandingHome({ onSignOut, onAccess, onLogin, workspaceMode = false, onWorkspaceNavigate }) {
+// World Overview stat bar + drag hint — shown over the globe on the default,
+// nothing-selected view (mirrors the Google Language Explorer's bottom
+// "World Overview" stat strip + "Drag to explore..." caption).
+function WorldOverviewPanel({ stats }) {
+  const items = [
+    { label: "Sectors Monitored", value: stats.sectors },
+    { label: "Active Hotspots", value: stats.hotspots },
+    { label: "Satellites Active", value: stats.satellites },
+    { label: "Countries / Regions", value: stats.sectors },
+  ];
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: "50%",
+        bottom: 28,
+        transform: "translateX(-50%)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 10,
+        pointerEvents: "none",
+        zIndex: 5,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: 28,
+          padding: "14px 28px",
+          borderRadius: 16,
+          background: "rgba(6, 10, 20, 0.55)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
+        }}
+      >
+        {items.map((stat) => (
+          <div key={stat.label} style={{ textAlign: "center", minWidth: 92 }}>
+            <div style={{ fontSize: 20, fontWeight: 600, color: "#fff", letterSpacing: 0.3 }}>
+              {stat.value}
+            </div>
+            <div
+              style={{
+                fontSize: 10,
+                color: "rgba(255,255,255,0.55)",
+                textTransform: "uppercase",
+                letterSpacing: 0.6,
+                marginTop: 2,
+              }}
+            >
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.45)", letterSpacing: 0.2 }}>
+        Drag to explore, or use the navigation buttons in the bottom-left corner
+      </p>
+    </div>
+  );
+}
+
+export default function LandingHome({ onSignOut, onAccess, onLogin, workspaceMode = false, onWorkspaceNavigate, landingEntrance = false }) {
   const [activeTab, setActiveTab] = useState(workspaceMode ? "map" : "Overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -375,6 +440,25 @@ export default function LandingHome({ onSignOut, onAccess, onLogin, workspaceMod
         r.category.toLowerCase().includes(q)
     );
   }, [searchQuery]);
+
+  // World-level rollup stats for the default overview panel (mirrors the
+  // reference site's "World Overview" strip: Languages / Population / etc.)
+  const worldStats = useMemo(() => {
+    const totalHotspots = SURVEILLANCE_REGIONS.reduce((sum, r) => {
+      const n = parseInt(String(r.metrics.hotspots).replace(/[^0-9]/g, ""), 10);
+      return sum + (isNaN(n) ? 0 : n);
+    }, 0);
+    const satellites = new Set();
+    SURVEILLANCE_REGIONS.forEach((r) => {
+      const name = String(r.metrics.satellitePass).split("•")[0].trim();
+      if (name) satellites.add(name);
+    });
+    return {
+      sectors: SURVEILLANCE_REGIONS.length,
+      hotspots: totalHotspots.toLocaleString(),
+      satellites: satellites.size,
+    };
+  }, []);
 
   // Audio toggle
   const toggleSound = () => {
@@ -430,7 +514,13 @@ export default function LandingHome({ onSignOut, onAccess, onLogin, workspaceMod
         targetCoords={selectedRegion?.coords}
         zoomLevel={zoomLevel}
         isCardOpen={cardOpen}
+        className={landingEntrance ? "globe-entry-active" : ""}
       />
+
+      <section className={`landing-hero-copy ${landingEntrance ? "hero-entry" : ""}`} aria-label="Orbital thermal intelligence">
+        <h1>Explore the planet&apos;s thermal signals</h1>
+        <p>Real-time wildfire and industrial heat intelligence from orbit.</p>
+      </section>
 
       {/* ── Top Header Bar (Google Research Language Explorer Style) ── */}
       <header className="explorer-header" role="banner">
@@ -485,6 +575,7 @@ export default function LandingHome({ onSignOut, onAccess, onLogin, workspaceMod
             className={`sound-toggle-btn ${soundOn ? "is-on" : ""}`}
             onClick={toggleSound}
             aria-label={soundOn ? "Mute ambient sound" : "Unmute ambient sound"}
+            title={soundOn ? undefined : "Best experienced with sound on"}
           >
             <span className="sound-bars" aria-hidden="true">
               <span className="bar" />
@@ -542,7 +633,7 @@ export default function LandingHome({ onSignOut, onAccess, onLogin, workspaceMod
       </header>
 
       {/* ── Center-Top Glassmorphic Search Bar ── */}
-      <div className="search-bar-container">
+      <div className={`search-bar-container ${landingEntrance ? "staged-entrance search-stage" : ""}`}>
         <div className={`search-pill ${searchFocused ? "is-focused" : ""}`}>
           <svg className="search-icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -615,7 +706,7 @@ export default function LandingHome({ onSignOut, onAccess, onLogin, workspaceMod
       </div>
 
       {workspaceMode && (
-        <div className="globe-filter-row" aria-label="Live map filters">
+        <div className={`globe-filter-row ${landingEntrance ? "staged-entrance filter-stage" : ""}`} aria-label="Live map filters">
           <label>Country<select defaultValue="all"><option value="all">All countries</option><option>India</option><option>United States</option><option>Australia</option></select></label>
           <label>Region<select defaultValue="all"><option value="all">All regions</option><option>Gujarat</option><option>Simlipal</option><option>Bandipur</option></select></label>
           <label>Continent<select defaultValue="all"><option value="all">All continents</option><option>Asia</option><option>Europe</option><option>Africa</option><option>Americas</option></select></label>
@@ -623,6 +714,9 @@ export default function LandingHome({ onSignOut, onAccess, onLogin, workspaceMod
           <label>Satellite<select defaultValue="all"><option value="all">All satellites</option><option>VIIRS</option><option>INSAT-3DR</option><option>Sentinel-3</option></select></label>
         </div>
       )}
+
+      {/* ── World Overview stat strip + drag hint (default, nothing-selected view) ── */}
+      {!cardOpen && !searchFocused && <WorldOverviewPanel stats={worldStats} />}
 
       {/* ── Right-Side Floating Glassmorphic Details Card (Matching main.mp4) ── */}
       {cardOpen && selectedRegion && (
